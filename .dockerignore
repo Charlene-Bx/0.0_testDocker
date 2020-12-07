@@ -1,0 +1,3 @@
+# Spécifie les dossiers et fichiers qui ne seront pas copier dans notre conteneur avec la fonction ADD
+node_modules
+.git
