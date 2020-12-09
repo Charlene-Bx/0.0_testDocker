@@ -8,24 +8,46 @@ services:
 
         build:
             context: ./php-apache                       # Chemin pointant vers le containeur
+        container_name: webserver
         ports:
-            - 8002:80                                     # Le port dédié à ce service         
+            - 80:80                                     # Le port dédié à ce service    
+        restart: always     
         volumes:
             - ./DocumentRoot:/var/www/html              # Les fichiers local:(vers)images
         links:
-            - 'mariadb'                                 # Definis la dependance(qui sera lancé en premiére) de l'image
+            - mariadb                                   # Definis la dependance(qui sera lancé en premiére) de l'image
+
 
     mariadb:
         image: mariadb:10.1
+        container_name: database
+        ports:
+            - "3306:3306"
+        restart: always
         volumes:
+            - ./mariadb:/docker-entrypoint-initdb.d/
             - mariadb:/var/lib/mysql                    # Volume nomé vers le point de montage du containeur
         environment:                                    # Definir les variable d'environement qui influenceront le comportement de notre containeur
-            TZ: "Europe/Brussels"
-            MYSQL_ALLOW_EMPTY_PASSWORD: "no"
-            MYSQL_ROOT_PASSWORD: "tulesaispas"
-            MYSQL_USER: 'charlene'
-            MYSQL_PASSWORD: 'tulesaispas'
-            MYSQL_DATABASE: 'testdb'
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_ROOT_USER: root
+            MYSQL_HOST: mariadb
+            MYSQL_DATABASE: mydb
+
+
+    myadmin:
+        image: phpmyadmin/phpmyadmin:4.8.1
+        container_name: phpmyadmin
+        ports:
+          - 8081:80
+        restart: always
+        environment: 
+            PMA_HOST: mydb
+            PMA_PORT: 3306
+            PMA_ROOT_USER: root
+            PMA_ROOT_PASSWORD: root
+        depends_on:
+          - mariadb
+
     
 volumes:                                                # Definir le volume nomé référencer dans le service mariadb
     mariadb:
